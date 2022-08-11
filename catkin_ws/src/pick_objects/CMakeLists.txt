@@ -7,11 +7,14 @@ project(pick_objects)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   move_base_msgs
   roscpp
   std_msgs
+  nav_msgs	
 )
 
 ## System dependencies are found with CMake's conventions
@@ -150,6 +153,9 @@ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
 )
 
+target_link_libraries(${PROJECT_NAME}
+   stdc++
+)
 #############
 ## Install ##
 #############
