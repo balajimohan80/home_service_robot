@@ -3,45 +3,41 @@
 #include <ros/ros.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
-#include <visualization_msgs/Marker.h>
+#include <nav_msgs/Odometry.h>
+
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-using pose_XY_Coor_t = std::tuple<double, double>;
+using goal_XY_Coor_t = std::tuple<double, double>;
 
 const int x_Coor = 0;
 const int y_Coor = 1;
 
-pose_XY_Coor_t goal_xycoor = std::make_tuple(0.0, 0.0);
-bool g_flg = false;
-void get_goal(const visualization_msgs::Marker::ConstPtr& msg)
-{
-  if ( (std::get<x_Coor>(goal_xycoor) != msg->pose.position.x) && 
-       (std::get<x_Coor>(goal_xycoor) != msg->pose.position.x)) { 
-    std::get<x_Coor>(goal_xycoor)  = msg->pose.position.x;
-    std::get<y_Coor>(goal_xycoor)  = msg->pose.position.y;
-    g_flg = true;
-    ROS_INFO("Update goal %f %f", std::get<x_Coor>(goal_xycoor), std::get<y_Coor>(goal_xycoor));
-  }
+goal_XY_Coor_t goal_xycoor;
+
+bool distance_reached = false;
+void get_robot_pose(const nav_msgs::Odometry::ConstPtr& msg) {
+	double dx = std::abs(std::get<x_Coor>(goal_xycoor)) - 
+	            std::abs(msg->pose.pose.position.x);
+	double dy = std::abs(std::get<y_Coor>(goal_xycoor)) - 
+	            std::abs(msg->pose.pose.position.y);
+	dx *= dx;
+	dy *= dy;
+	distance_reached = 0.3 > std::sqrt(dx + dy) ? true : false;
 }
 
 
-bool set_position(pose_XY_Coor_t xy_Coor, double orientation, MoveBaseClient &ac) {
+bool set_position(goal_XY_Coor_t xy_Coor, double orientation, MoveBaseClient &ac) {
 	move_base_msgs::MoveBaseGoal goal;
 
 	//Set up the frame parameters
 	goal.target_pose.header.frame_id = "map";
 	goal.target_pose.header.stamp = ros::Time::now();
-#if 0	
+	
 	//Define a XY position and orientation 
 	goal.target_pose.pose.position.x = std::get<y_Coor>(xy_Coor);
 	goal.target_pose.pose.position.y = std::get<x_Coor>(xy_Coor) * -1.0;
 	goal.target_pose.pose.orientation.w    = 1.0;
-#else
-	//Define a XY position and orientation 
-	goal.target_pose.pose.position.x = std::get<x_Coor>(xy_Coor);
-	goal.target_pose.pose.position.y = std::get<y_Coor>(xy_Coor);
-	goal.target_pose.pose.orientation.w    = 1.0;
-#endif
+
 	ROS_INFO("Sending goal");
 	ac.sendGoal(goal);
 
@@ -59,27 +55,38 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	ros::Rate r(1);
 
-	ros::Subscriber marker_sub = n.subscribe("visualization_marker", 10, get_goal);	
 	MoveBaseClient ac("move_base", true);
 
 	//Wait for 5 seconds for move_base action server to come up
 	while (!ac.waitForServer(ros::Duration(5.0))) {
 		ROS_INFO("Waiting for the move_base action server to come up");
 	}
-	while (!g_flg) {
-		ros::spinOnce();
-	}
-	g_flg = false;
-	if (set_position(goal_xycoor, 1.0, ac)) {
+	
+	const goal_XY_Coor_t pick_up_xy_Coor  = std::make_tuple(7.0, 2.0);
+	const goal_XY_Coor_t drop_off_xy_Coor = std::make_tuple(3.0, -8.0);
+
+	goal_xycoor = pick_up_xy_Coor; 
+	ros::Subscriber pose_sub = n.subscribe("odom", 10, get_robot_pose);
+	
+	if (set_position(pick_up_xy_Coor, 1.0, ac)) {
 		ROS_INFO("Hooray: Pick-up Zone Reached\n");
 	}
-	while(!g_flg) {
+	for (int i = 0; i < 5; i++) {
 		ros::spinOnce();
+		sleep(1);
 	}
-	g_flg = false;
-	if (set_position(goal_xycoor, 1.0, ac)) {
+	std::cout << "distance_reached: " << distance_reached << "\n";
+
+	goal_xycoor = drop_off_xy_Coor;
+	distance_reached = 0;
+	if (set_position(drop_off_xy_Coor, 1.0, ac)) {
 		ROS_INFO("Hooray: Drop-off Zone Reached\n");
 	}
 	
+	for (int i = 0; i < 5; i++) {
+		ros::spinOnce();
+		sleep(1);
+	}
+	std::cout << "distance_reached: " << distance_reached << "\n";
 	return 0;	
 }

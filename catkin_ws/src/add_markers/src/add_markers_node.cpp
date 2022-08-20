@@ -1,27 +1,46 @@
 #include <iostream>
+#include <cmath>
+#include <tuple>
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <nav_msgs/Odometry.h>
+
 
 enum state {
    PICK_UP_STATE,
    HIDE_STATE,
    DROP_OFF_STATE,
+   END_STATE,
 };
 
-int main( int argc, char** argv )
-{
-  ros::init(argc, argv, "add_markers");
-  ros::NodeHandle n;
-  ros::Rate r(1);
-  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+using pose_XY_Coor_t = std::tuple<double, double>;
+const int x_Coor = 0;
+const int y_Coor = 1;
 
-  // Set our initial shape type to be a cube
-  uint32_t shape = visualization_msgs::Marker::CUBE;
-  state curr_State = PICK_UP_STATE;
+pose_XY_Coor_t robot_Curr_Pose;
 
-  while (ros::ok())
-  {
+void get_robot_pose(const nav_msgs::Odometry::ConstPtr& msg) {
+	std::get<x_Coor>(robot_Curr_Pose) = msg->pose.pose.position.x;
+	std::get<y_Coor>(robot_Curr_Pose) = msg->pose.pose.position.y;
+}
+
+double compute_Distance(pose_XY_Coor_t src, pose_XY_Coor_t dst) {
+	double dx = std::abs(std::get<x_Coor>(src)) - 
+	            std::abs(std::get<x_Coor>(dst));
+
+	double dy = std::abs(std::get<y_Coor>(src)) -
+	            std::abs(std::get<y_Coor>(dst));
+	dx *= dx;
+	dy *= dy;
+	double temp = std::sqrt(dx + dy);
+	std::cout << "Compute_Distance temp: " << temp << "\n";
+	return temp;
+}
+
+void publish_visulaization_marker(pose_XY_Coor_t disp_xy, ros::Publisher &pub, int32_t action) {
     visualization_msgs::Marker marker;
+	
+	
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
     marker.header.frame_id = "map";
     marker.header.stamp = ros::Time::now();
@@ -32,7 +51,7 @@ int main( int argc, char** argv )
     marker.id = 0;
 
     // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-    marker.type = shape;
+    marker.type = visualization_msgs::Marker::CUBE;
 
 
     // Set the scale of the marker -- 1x1x1 here means 1m on a side
@@ -47,70 +66,83 @@ int main( int argc, char** argv )
     marker.color.a = 1.0;
 
     marker.lifetime = ros::Duration();
-
-    switch(curr_State) {
-        case PICK_UP_STATE:
-        curr_State = HIDE_STATE;
-        marker.action = visualization_msgs::Marker::ADD;
-
-        marker.pose.position.x = 5.0;
-        marker.pose.position.y = 0;
-        marker.pose.position.z = 0;
-        marker.pose.orientation.x = 0.0;
-        marker.pose.orientation.y = 0.0;
-        marker.pose.orientation.z = 0.0;
-        marker.pose.orientation.w = 1.0;
-        break;
-
-        case HIDE_STATE:
-        curr_State = DROP_OFF_STATE;
-        marker.action = visualization_msgs::Marker::DELETE;
-        break;
-
-        case DROP_OFF_STATE:
-        marker.action = visualization_msgs::Marker::ADD;
-        marker.pose.position.x = -5.0;
-        marker.pose.position.y = 0;
-        marker.pose.position.z = 0;
-        marker.pose.orientation.x = 0.0;
-        marker.pose.orientation.y = 0.0;
-        marker.pose.orientation.z = 0.0;
-        marker.pose.orientation.w = 1.0;
-        break; 
-    }	
-
-
+    marker.action = action;
+    marker.pose.position.x = std::get<y_Coor>(disp_xy);
+    marker.pose.position.y = std::get<x_Coor>(disp_xy) * -1.0;
+    marker.pose.position.z = 0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
 
     // Publish the marker
-    while (marker_pub.getNumSubscribers() < 1)
+    while (pub.getNumSubscribers() < 1)
     {
       if (!ros::ok())
       {
-        return 0;
+        return;
       }
       ROS_WARN_ONCE("Please create a subscriber to the marker");
       sleep(1);
     }
-    marker_pub.publish(marker);
+    pub.publish(marker);
+    return;
+}
+
+
+int main( int argc, char** argv )
+{
+  ros::init(argc, argv, "add_markers");
+  ros::NodeHandle n;
+  ros::Rate r(1);
+
+  pose_XY_Coor_t pick_up_coor  = std::make_tuple(7.0, 5.0);
+  pose_XY_Coor_t drop_off_coor = std::make_tuple(3.0, -8.0); 	
+
+  ros::Subscriber pose_sub = n.subscribe("odom", 10, get_robot_pose);
+  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  ros::spinOnce();
+  state next_State = PICK_UP_STATE;
+  bool brk_flg = true;
+  while (ros::ok() && brk_flg)
+  {
+
+    switch(next_State) {
+        case PICK_UP_STATE:
+        next_State = HIDE_STATE;
+	publish_visulaization_marker(pick_up_coor, marker_pub, visualization_msgs::Marker::ADD);
+	ros::spinOnce();
+	std::cout << "PICK_UP_STATE: Publihsing 7.0 & 5.0\n";
+	while (0.3 < compute_Distance(robot_Curr_Pose, pick_up_coor)) {
+		ros::spinOnce();
+	} 
+        break;
+
+        case HIDE_STATE:
+        next_State = DROP_OFF_STATE;
+	std::cout << "HIDE_STATE: Publishing delete  7.0 & 5.0\n";
+	publish_visulaization_marker(pick_up_coor, marker_pub, visualization_msgs::Marker::DELETE);
         sleep(5);
- #if 0   
-    // Cycle between different shapes
-    switch (shape)
-    {
-    case visualization_msgs::Marker::CUBE:
-      shape = visualization_msgs::Marker::SPHERE;
-      break;
-    case visualization_msgs::Marker::SPHERE:
-      shape = visualization_msgs::Marker::ARROW;
-      break;
-    case visualization_msgs::Marker::ARROW:
-      shape = visualization_msgs::Marker::CYLINDER;
-      break;
-    case visualization_msgs::Marker::CYLINDER:
-      shape = visualization_msgs::Marker::CUBE;
-      break;
-    }
-#endif
+	break;
+
+        case DROP_OFF_STATE:
+	std::cout << "DROP_OFF_STATE: publishing delete 3.0 & -8.0\n";
+	publish_visulaization_marker(drop_off_coor, marker_pub, visualization_msgs::Marker::DELETE);
+        ros::spinOnce();
+	while (0.3 < compute_Distance(robot_Curr_Pose, drop_off_coor)) {
+		ros::spinOnce();
+	}
+	std::cout << "DROP_OFF_STATE: publishing add 3.0 & -8.0\n";
+	publish_visulaization_marker(drop_off_coor, marker_pub, visualization_msgs::Marker::ADD);
+	next_State = END_STATE;	
+	break; 
+
+	case END_STATE:
+	brk_flg = false;
+	break;
+    }	
+
     r.sleep();
   }
+  return 0;
 }

@@ -7,9 +7,12 @@ project(add_markers)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   visualization_msgs
+  nav_msgs 
 )
 
 ## System dependencies are found with CMake's conventions
@@ -133,7 +136,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME} src/add_markers_node.cpp)
-
+# add_executable(${PROJECT_NAME}_test src/add_markers_node_test.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -148,6 +151,11 @@ add_executable(${PROJECT_NAME} src/add_markers_node.cpp)
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
  )
+
+target_link_libraries(${PROJECT_NAME}
+   stdc++
+)
+
 
 #############
 ## Install ##
