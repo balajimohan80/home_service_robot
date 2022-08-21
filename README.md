@@ -25,61 +25,7 @@ Following git-hub ROS packages are used:
 3.	https://github.com/turtlebot/turtlebot_interactions
 4.	https://github.com/turtlebot/turtlebot_simulator
 
-### Directory Layout
-
-catkin_ws
-└── src
-    ├── add_markers
-    |   ├── CMakeLists.txt
-    │   ├── package.xml
-    │   └── src
-    │       ├── add_markers_node.cpp
-    │       └── add_markers_node_test.cpp
-    ├── map
-    │   ├── maps.pgm
-    │   ├── maps.world
-    │   └── maps.yaml
-    ├── pick_objects
-    │   ├── CMakeLists.txt
-    │   ├── package.xml
-    │   └── src
-    │       ├── pick_objects_node.cpp
-    │       └── pick_objects_node_orig.cpp
-    ├── scripts
-    │   ├── add_markers.sh
-    │   ├── home_service.sh
-    │   ├── pick_objects.sh
-    │   ├── test_navigation.sh
-    │   └── test_slam.sh
-    ├── slam_gmapping
-    │   ├── README.md
-    │   ├── gmapping
-    │   └── slam_gmapping
-    ├── turtlebot
-    │   ├── LICENSE
-    │   ├── README.md
-    │   ├── setup_create.sh
-    │   ├── setup_kobuki.sh
-    │   ├── turtlebot
-    │   ├── turtlebot.rosinstall
-    │   ├── turtlebot_bringup
-    │   ├── turtlebot_capabilities
-    │   ├── turtlebot_description
-    │   └── turtlebot_teleop
-    ├── turtlebot_interactions
-    │   ├── README.md
-    │   ├── turtlebot_dashboard
-    │   ├── turtlebot_interactions
-    │   ├── turtlebot_interactive_markers
-    │   └── turtlebot_rviz_launchers
-    └── turtlebot_simulator
-        ├── README.md
-        ├── turtlebot_gazebo
-        ├── turtlebot_simulator
-        ├── turtlebot_simulator.rosinstall
-        ├── turtlebot_stage
-        └── turtlebot_stdr
-93 directories, 284 files
+![Directory_Layout](./image/dir_layout.png)
 
 
 
