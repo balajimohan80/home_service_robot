@@ -8,6 +8,13 @@ enum state {
    DROP_OFF_STATE,
 };
 
+using pose_XY_Coor_t = std::tuple<double, double>;
+const int x_Coor = 0;
+const int y_Coor = 1;
+
+pose_XY_Coor_t robot_Curr_Pose;
+
+
 int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers");
@@ -18,6 +25,9 @@ int main( int argc, char** argv )
   // Set our initial shape type to be a cube
   uint32_t shape = visualization_msgs::Marker::CUBE;
   state curr_State = PICK_UP_STATE;
+
+  pose_XY_Coor_t pick_up_coor  = std::make_tuple(7.0, 5.0);
+  pose_XY_Coor_t drop_off_coor = std::make_tuple(3.0, -8.0);
 
   while (ros::ok())
   {
@@ -53,8 +63,8 @@ int main( int argc, char** argv )
         curr_State = HIDE_STATE;
         marker.action = visualization_msgs::Marker::ADD;
 
-        marker.pose.position.x = 5.0;
-        marker.pose.position.y = 0;
+        marker.pose.position.x = std::get<y_Coor>(pick_up_coor);
+        marker.pose.position.y = std::get<x_Coor>(pick_up_coor) * -1.0;
         marker.pose.position.z = 0;
         marker.pose.orientation.x = 0.0;
         marker.pose.orientation.y = 0.0;
@@ -69,8 +79,8 @@ int main( int argc, char** argv )
 
         case DROP_OFF_STATE:
         marker.action = visualization_msgs::Marker::ADD;
-        marker.pose.position.x = -5.0;
-        marker.pose.position.y = 0;
+        marker.pose.position.x =  std::get<y_Coor>(drop_off_coor);
+        marker.pose.position.y =  std::get<x_Coor>(drop_off_coor) * -1.0; 
         marker.pose.position.z = 0;
         marker.pose.orientation.x = 0.0;
         marker.pose.orientation.y = 0.0;

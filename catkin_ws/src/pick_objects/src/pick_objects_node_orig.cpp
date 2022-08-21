@@ -51,7 +51,7 @@ bool set_position(goal_XY_Coor_t xy_Coor, double orientation, MoveBaseClient &ac
 
 int main(int argc, char **argv) {
 	//Initialize the node and name of the node is "simple_naviagation_goals"	
-	ros::init(argc, argv, "simple_navigation_goals");
+	ros::init(argc, argv, "pick_objects");
 	ros::NodeHandle n;
 	ros::Rate r(1);
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 		ROS_INFO("Waiting for the move_base action server to come up");
 	}
 	
-	const goal_XY_Coor_t pick_up_xy_Coor  = std::make_tuple(7.0, 2.0);
+	const goal_XY_Coor_t pick_up_xy_Coor  = std::make_tuple(7.0, 5.0);
 	const goal_XY_Coor_t drop_off_xy_Coor = std::make_tuple(3.0, -8.0);
 
 	goal_xycoor = pick_up_xy_Coor; 
@@ -75,7 +75,6 @@ int main(int argc, char **argv) {
 		ros::spinOnce();
 		sleep(1);
 	}
-	std::cout << "distance_reached: " << distance_reached << "\n";
 
 	goal_xycoor = drop_off_xy_Coor;
 	distance_reached = 0;
@@ -85,8 +84,7 @@ int main(int argc, char **argv) {
 	
 	for (int i = 0; i < 5; i++) {
 		ros::spinOnce();
-		sleep(1);
+		sleep(2);
 	}
-	std::cout << "distance_reached: " << distance_reached << "\n";
 	return 0;	
 }

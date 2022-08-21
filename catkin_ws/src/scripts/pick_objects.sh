@@ -19,5 +19,5 @@ xterm  -e "source devel/setup.bash;
 
 sleep 3
 xterm -e "source devel/setup.bash;
-	  rosrun pick_objects pick_objects "
+	  rosrun pick_objects pick_objects_test "
  

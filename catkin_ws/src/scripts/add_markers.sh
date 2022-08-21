@@ -19,5 +19,5 @@ xterm  -e "source devel/setup.bash;
 
 sleep 3
 xterm -e "source devel/setup.bash;
-	  rosrun add_markers add_markers "
+	  rosrun add_markers add_markers_test "
  

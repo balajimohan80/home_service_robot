@@ -32,9 +32,7 @@ double compute_Distance(pose_XY_Coor_t src, pose_XY_Coor_t dst) {
 	            std::abs(std::get<y_Coor>(dst));
 	dx *= dx;
 	dy *= dy;
-	double temp = std::sqrt(dx + dy);
-	std::cout << "Compute_Distance temp: " << temp << "\n";
-	return temp;
+	return std::sqrt(dx + dy);
 }
 
 void publish_visulaization_marker(pose_XY_Coor_t disp_xy, ros::Publisher &pub, int32_t action) {
@@ -112,7 +110,6 @@ int main( int argc, char** argv )
         next_State = HIDE_STATE;
 	publish_visulaization_marker(pick_up_coor, marker_pub, visualization_msgs::Marker::ADD);
 	ros::spinOnce();
-	std::cout << "PICK_UP_STATE: Publihsing 7.0 & 5.0\n";
 	while (0.3 < compute_Distance(robot_Curr_Pose, pick_up_coor)) {
 		ros::spinOnce();
 	} 
@@ -120,19 +117,16 @@ int main( int argc, char** argv )
 
         case HIDE_STATE:
         next_State = DROP_OFF_STATE;
-	std::cout << "HIDE_STATE: Publishing delete  7.0 & 5.0\n";
 	publish_visulaization_marker(pick_up_coor, marker_pub, visualization_msgs::Marker::DELETE);
         sleep(5);
 	break;
 
         case DROP_OFF_STATE:
-	std::cout << "DROP_OFF_STATE: publishing delete 3.0 & -8.0\n";
 	publish_visulaization_marker(drop_off_coor, marker_pub, visualization_msgs::Marker::DELETE);
         ros::spinOnce();
 	while (0.3 < compute_Distance(robot_Curr_Pose, drop_off_coor)) {
 		ros::spinOnce();
 	}
-	std::cout << "DROP_OFF_STATE: publishing add 3.0 & -8.0\n";
 	publish_visulaization_marker(drop_off_coor, marker_pub, visualization_msgs::Marker::ADD);
 	next_State = END_STATE;	
 	break; 
