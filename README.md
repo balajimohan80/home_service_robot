@@ -20,10 +20,10 @@ In this project, the following software simulator and packages are used:
 5.	Robot software package – TurtleBot (https://www.turtlebot.com/)
 
 Following git-hub ROS packages are used:
-a. https://github.com/ros-perception/slam_gmapping
-b. https://github.com/turtlebot/turtlebot
-c. https://github.com/turtlebot/turtlebot_interactions
-d. https://github.com/turtlebot/turtlebot_simulator
+a.	https://github.com/ros-perception/slam_gmapping
+b.	https://github.com/turtlebot/turtlebot
+c.	https://github.com/turtlebot/turtlebot_interactions
+d.	https://github.com/turtlebot/turtlebot_simulator
 
 ### Directory Layout
 
