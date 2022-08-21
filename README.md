@@ -25,7 +25,8 @@ Following git-hub ROS packages are used:
 3.	https://github.com/turtlebot/turtlebot_interactions
 4.	https://github.com/turtlebot/turtlebot_simulator
 
-![Directory_Layout](./image/dir_layout.png)
+### Directory_Layout
+![Directory_Layout](./image/dir_layout.jpg)
 
 
 
