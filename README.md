@@ -29,4 +29,18 @@ Following git-hub ROS packages are used:
 ![Directory_Layout](./image/dir_layout.jpg)
 
 
+### To Clone
+git clone https://github.com/balajimohan80/home_service_robot.git
+
+### To run scripts
+cd home_service_robot/catkin_ws/src/scripts
+
+### Script directory has following scripts to launch:
+1. test_slam.sh - Create a functional map of the environment which would be used for localization and navigation tasks.
+2. test_navigation.sh - The robot could navigate in the environment after a 2D Nav Goal command is issued in RVIZ.
+3. pick_objects.sh - The robot travels to the desired pickup zone, displays a message that it reached its destination, waits 5 seconds, travels to the desired drop off zone, and displays a message that it reached the drop off zone.
+4. add_markers.sh - The marker should initially be published at the pickup zone. After 5 seconds it should be hidden. Then after another 5 seconds it should appear at the drop off zone.
+5. home_service.sh - At launch, initially show the marker at pickup zone. After robot reached to pickup zone, hide the objects at pickup zone and wait for 5 seconds to simulate drop-off zone. After robot reached to drop-off zone, marked will display the objects in RVIZ.
+
+
 
